@@ -12,13 +12,3 @@ This project visualizes the planets orbiting around the Sun, complete with textu
 - Lightweight and responsive design  
 
 ---
-
-# Project Structure
-
-
-Solar-System/
-├── index.html # Main entry point
-├── css/ # Stylesheets
-├── js/ # JavaScript files
-├── models/ # 3D models (.glb, .gltf)
-└── assets/ # Textures, images, sounds (if any)
