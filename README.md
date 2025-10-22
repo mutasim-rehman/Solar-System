@@ -1,128 +1,166 @@
-# **Near-Earth Object (NEO) Visualization**
+# **Solar System Explorer**
 
-This project is an interactive 3D visualization of Near-Earth Objects (asteroids) as they pass by our planet. It fetches real-time data from the NASA API to plot the trajectories and provide information about asteroids approaching Earth. The application is built using Three.js for the 3D rendering and features a "mission control" style heads-up display (HUD) for a more immersive experience.
+A high-fidelity, interactive 3D simulation of our solar system built with Three.js. This project renders planets, moons, spacecraft, and comets with real-time and simulated orbital mechanics, inspired by NASA's "Eyes on the Solar System."
 
-## **Features**
+## **About The Project**
 
-* **Real-time Data**: Utilizes the NASA NeoWs (Near Earth Object Web Service) API to fetch data on asteroids.  
-* **Interactive 3D Globe**: A detailed 3D model of the Earth, complete with day/night cycles, clouds, and atmospheric glow.  
-* **Asteroid Tracking**: Visualizes the trajectories of both potentially hazardous and safe asteroids.  
-* **Dynamic HUD**: Displays key information such as the number of tracked objects, system time, and a threat assessment panel.  
-* **Time Controls**: Allows the user to pause and resume the simulation time.  
-* **Informative Tooltips**: Hovering over an asteroid reveals detailed information about it, including its name, size, velocity, and miss distance.  
-* **Mini-Map**: Provides a 2D overhead view of the Earth and surrounding asteroids for better situational awareness.  
-* **Customizable Data Range**: Users can select to view data for the next 7, 30, or 180 days.
+This web application provides an interactive 3D visualization of the solar system. It leverages Three.js for WebGL rendering to create an immersive experience. Users can explore planets, track spacecraft, and control the flow of time to watch orbital patterns. The UI is heavily inspired by NASA's jet propulsion laboratory (JPL) aesthetic, providing a clean, data-driven interface for interaction.
 
-## **Technologies Used**
+The simulation can run in two modes:
 
-* **Three.js**: The core 3D library used for rendering all objects and effects.  
-* **HTML5 & CSS3**: For the structure and styling of the user interface and HUD elements.  
-* **JavaScript (ES6 Modules)**: For the application logic, API interaction, and 3D scene management.  
-* **NASA NeoWs API**: The source of the asteroid data.
+1. **Simulation Mode:** Control the speed of time, from 'Paused' up to '100 Years/sec', to observe long-term orbital dynamics.  
+2. **Live Mode:** (Requires NASA API) Aims to sync with real-world time and data to show the current state of the solar system.
 
-## **Setup and Installation**
+## **Key Features**
 
-To run this project locally, you'll need a web server. You can use a simple one like the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension for Visual Studio Code.
+* **3D Solar System:** Renders the Sun, all major planets, and their primary moons.  
+* **Time Control:** A full-service time panel to pause, play, and accelerate time from 1 day/sec to 100 years/sec.  
+* **Real-Time & Simulated Orbits:** Calculates and displays elliptical orbital paths. Planet positions are updated based on orbital period and eccentricity.  
+* **Spacecraft Tracking:** Loads 3D GLTF models for famous spacecraft (e.g., Voyager, ISS, Hubble, James Webb) and places them in their correct orbits.  
+* **Procedural Generation:**  
+  * **Asteroid Belt:** A THREE.Points based, procedurally generated asteroid belt between Mars and Jupiter.  
+  * **Planetary Rings:** Particle-based, procedural rings for Saturn, Jupiter, Uranus, and Neptune.  
+  * **Comets:** Generates comets with a nucleus, coma, and a tail that realistically points away from the Sun.  
+* **NASA API Integration:** Prompts for a NASA API key to (in future) fetch live data. Currently, it validates the key and simulates live positions.  
+* **Interactive UI:**  
+  * **Search:** Find any object (planet, moon, spacecraft) by name.  
+  * **Focus View:** Double-click or search to smoothly animate and lock the camera onto any object.  
+  * **Visibility Toggles:** Selectively hide/show planets, moons, spacecraft, orbits, and labels.  
+* **Optimized Labeling:** Renders 2D HTML labels that automatically de-cluster (hide overlapping labels) to maintain a clean view.  
+* **Loading Screen:** A polished loading overlay with a solar-system animation and a progress bar that tracks loaded assets.
 
-1. **Clone or Download the Repository**: Get the index.html and main.js files and place them in a directory.  
-2. **Get a NASA API Key**:  
-   * Visit the [NASA API website](https://api.nasa.gov/).  
-   * Fill out the form to get your free API key.  
-   * By default, the application uses DEMO\_KEY, which has strict rate limits. It is highly recommended to use your own key.  
-3. **Run the project**:  
-   * Open the index.html file with your local web server.  
-   * The application will load, and you will be prompted to enter your NASA API key.
+
+## **Built With**
+
+* [Three.js](https://threejs.org/) \- The core 3D WebGL library.  
+* [JavaScript (ES6+ Modules)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) \- For the main application logic.  
+* [HTML5](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5) \- For structure and the UI overlay.  
+* [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS) \- For the complete NASA-inspired styling.
 
 ## **File Structure**
 
-The project is contained within two main files:
+Your code implies the following file structure. You must create the textures/ and models/ directories and populate them with the necessary assets for the application to run.
 
-* index.html: The main HTML file that contains the structure of the page, the CSS for the HUD, and the canvas element for the 3D scene. The JavaScript code is included as a module within this file.  
-* main.js: This file contains all the JavaScript logic for the application. It has been embedded into the index.html file but can be kept separate for better organization.
+/solar-system-explorer  
+│  
+├── index.html  
+├── main.js  
+│  
+├── textures/  
+│   ├── sun.png  
+│   ├── mercury.jpg  
+│   ├── venus.jpg  
+│   ├── earth.jpg  
+│   ├── mars.jpg  
+│   ├── jupiter.jpg  
+│   ├── saturn.jpg  
+│   ├── uranus.jpg  
+│   ├── neptune.jpg  
+│   ├── blue\_marble.png  
+│   └── blue\_marble.jpg  
+│  
+└── models/  
+    ├── OSIRIS-REx.glb  
+    ├── Parker Solar Probe.glb  
+    ├── New\_Horizons.glb  
+    ├── Voyager Probe (A).glb  
+    ├── Voyager Probe (B).glb  
+    ├── James Webb Space Telescope (B).glb  
+    ├── Hubble Space Telescope (A).glb  
+    ├── International Space Station (ISS) (A).glb  
+    └── Gateway Core.glb
 
-## **Code Structure and Logic (main.js)**
+## **Getting Started**
 
-The JavaScript is organized into logical sections using comments.
+To run this project locally, you **must** use a local web server. Opening index.html directly from the filesystem (file:///...) will **not** work due to browser security policies (CORS) related to ES6 modules, fetch, and loading external assets.
 
-### **1\. Constants and Global State**
+### **Prerequisites**
 
-This section defines key constants for the simulation, such as the radii of the Earth and Moon, and initializes global variables that will be used throughout the application to manage its state.
+* A modern web browser (Chrome, Firefox, Safari, Edge).  
+* A local web server. The easiest way is using [Node.js](https://nodejs.org/) and the npx command.  
+* (Optional but Recommended) A NASA API Key.
 
-// \========== CONSTANTS \==========  
-const EARTH\_RADIUS \= 10;  
-// ...
+### **Installation & Setup**
 
-// \========== GLOBAL STATE \==========  
-let nasaApiKey \= '';  
-let allAsteroidData \= \[\];  
-let simulationDate \= new Date();  
-// ...
+1. **Download Files:** Place index.html and main.js in a new project folder.  
+2. **Create Asset Folders:** Inside your project folder, create two new folders:  
+   * textures/  
+   * models/  
+3. **Add Assets:** (This is the critical step) You must find and add all the texture images and .glb 3D models listed in the [File Structure](#bookmark=id.pink0jywloql) section. The names must match *exactly* what is specified in main.js.  
+4. **Launch a Local Server:**  
+   * Open a terminal or command prompt in your project's root folder.  
+   * If you have Node.js, run the following command:  
+     npx serve
 
-### **2\. THREE.js Setup**
+   * This will start a server, typically at http://localhost:3000.  
+5. **Open the Application:**  
+   * Open your web browser and navigate to the URL provided by your local server (e.g., http://localhost:3000).
 
-This is where the fundamental Three.js components are initialized:
+## **Usage**
 
-* **Scene**: The container for all 3D objects.  
-* **Camera**: The perspective from which the scene is viewed.  
-* **Renderer**: Renders the scene onto the HTML canvas. It's configured for anti-aliasing and shadow mapping.  
-* **Label Renderer**: A separate renderer (CSS2DRenderer) is used to display HTML-based labels for the asteroids in the 3D space.
+### **NASA API Key**
 
-### **3\. Lighting**
+* On first load, the application will prompt you for a NASA API key.  
+* This is used to validate a connection to NASA's data services.  
+* You can get a free key from [api.nasa.gov](https://api.nasa.gov/).  
+* Once entered, the key is saved in your browser's localStorage for future visits.
 
-The scene's lighting is set up to create a realistic look:
+### **Controls**
 
-* **sunLight (DirectionalLight)**: Represents the sun, casting shadows and illuminating the scene. Its position is updated in the animation loop to simulate the day/night cycle.  
-* **ambientLight**: Provides a soft, ambient light to the entire scene.
+* **Camera:**  
+  * **Rotate:** Left-Click \+ Drag  
+  * **Zoom:** Mouse Wheel Scroll  
+  * **Pan:** Right-Click \+ Drag  
+* **Search Panel (Top-Left):**  
+  * Type the name of any object (e.g., "Mars", "ISS", "Halley's Comet").  
+  * Click the object in the results list to automatically fly to it and set it as the focus.  
+* **View Options (Left Panel):**  
+  * **Orbital Paths:** Toggles the visibility of all elliptical orbit lines.  
+  * **Object Labels:** Toggles the visibility of all 2D name labels.  
+  * **Reset View:** Resets the camera to the default wide-angle view of the solar system.  
+* **Object Visibility (Left Panel):**  
+  * Use these toggles to show or hide entire categories of objects (Planets, Moons, Spacecraft, Comets).  
+* **Time Control Panel (Bottom-Center):**  
+  * **SIM / LIVE Buttons:** Switch between Simulation mode (time control enabled) and Live mode (real-time).  
+  * **Time Slider:** In 'SIM' mode, drag the slider to change the speed of time. The scale ranges from 'Paused' to '100 Years/sec'.  
+  * **Current Date:** Displays the current date of the simulation, which updates dynamically as time accelerates.
 
-### **4\. 3D Objects**
+## **Code Architecture**
 
-* **Starfield**: A particle system creates a dense field of stars in the background for a sense of depth.  
-* **Earth**: The Earth is a Group containing multiple meshes:  
-  * earthMesh: The main sphere with detailed day, night, specular, and normal maps.  
-  * cloudMesh: A slightly larger, transparent sphere with a cloud texture that rotates at a different speed.  
-  * atmosphereMesh: Uses a custom shader to create a glowing atmospheric effect around the edge of the planet.  
-* **Moon**: A textured sphere that orbits the Earth.  
-* **Asteroids**: Each asteroid is represented by an IcosahedronGeometry and is added to a single asteroidGroup for easy management. Their trajectories are visualized with a Line object.
+The application is built around a single, comprehensive ES6 class, SolarSystem3D.
 
-### **5\. NASA API Interaction (loadAsteroidData)**
+### **Main Class: SolarSystem3D**
 
-This asynchronous function is responsible for fetching the asteroid data.
+* **constructor():** Initializes the Three.js scene, camera, renderer, labelRenderer, OrbitControls, and LoadingManager. It also sets up the initial application state (e.g., isPaused, timeScale).  
+* **init():** The main setup function called after instantiation. It creates the starfield, builds the solar system, adds moons, and initializes the UI event listeners and the API modal.  
+* **initLoadingManager():** Configures the THREE.LoadingManager to update the loading screen's progress bar and text. It's responsible for hiding the loading screen when all assets are complete.  
+* **initApiModal() / connectToNasaApi():** Manages the API key logic, from checking localStorage to validating the key against a test endpoint.  
+* **Asset Creation Functions:**  
+  * **createCelestialBody(config):** A factory function that builds a planet or the Sun. It takes a large configuration object to set everything: size, texture, orbital distance, speed, tilt, eccentricity, and procedural rings.  
+  * **addMoons():** Fetches moon data and attaches them (with their own pivots and orbits) to their parent planets.  
+  * **create...Belt/Comets/Starfield():** Procedural generators that create thousands of particles (THREE.Points) to represent these phenomena.  
+  * **fetchSpacecraftData() / loadSpacecraftModel(craft):** Asynchronously loads .glb 3D models, scales them, and places them into their respective orbits (either around the Sun or a parent body like Earth or the Moon).  
+* **UI Functions:**  
+  * **initUI():** Binds all HTML buttons and sliders (\#time-slider, \#toggle-orbits, etc.) to methods within the SolarSystem3D class, updating the application's state.  
+  * **setMode(mode):** Switches the application state between 'live' and 'simulation'.  
+* **focusAndFitObject(target):** Handles the camera animation to smoothly zoom in on a selected object, calculating the correct distance based on the object's bounding sphere.
+* ![UML Diagram](uml_diagram_3dss.png)
 
-* It breaks down the requested date range into 7-day chunks (the maximum allowed by the API).  
-* It iterates through these chunks, fetching data for each and updating a progress bar.  
-* Once all data is loaded, it calls createAsteroidVisuals() to populate the scene.
+### **Animation Loop**
 
-### **6\. HUD and UI Updates**
+* **animate():** The "heartbeat" of the application, called every frame using requestAnimationFrame().  
+* **Time Calculation:** First, it calculates the deltaTime (time since last frame). Based on the timeScale and isPaused state, it advances the this.currentDate.  
+* **Object Updates:**  
+  * It iterates through all celestial bodies, spacecraft, and comets, updating their positions and rotations based on their orbital speeds and the calculated time factor.  
+  * Updates the asteroid belt vertices.  
+  * Updates the comet tail to always point away from the Sun.  
+* **Camera & Controls:** Updates OrbitControls and handles the camera logic if a focusTarget is set.  
+* **Labeling:** Calls handleLabelClustering() to intelligently hide labels that are overlapping from the camera's perspective.  
+* **Render:** Calls renderer.render() and labelRenderer.render() to draw the new frame.
 
-A set of functions are dedicated to updating the various HUD elements:
+## **Future Enhancements**
 
-* updateStatistics(): Populates the "Mission Control" and "Threat Assessment" panels.  
-* updateSystemTime(): Updates the clock and simulation date.  
-* updateMiniMap(): Draws the positions of asteroids on the 2D mini-map canvas.  
-* updateTooltip(): Updates the content of the tooltip when hovering over an asteroid.
-
-### **7\. User Interaction**
-
-* **Mouse (handleMouseMove)**: Uses a Raycaster to detect when the mouse is hovering over an asteroid to show the tooltip.  
-* **Keyboard**:  
-  * Spacebar: Pauses/resumes the simulation.  
-  * R: Resets the camera to its initial position.  
-* **Buttons**: Event listeners are set up for the API key submission and the visibility toggle buttons.
-
-### **8\. Animation Loop (animate)**
-
-This is the heart of the application, where everything is updated and rendered on each frame.
-
-* It advances the simulationDate based on the timeMultiplier.  
-* It updates the rotation of the Earth, clouds, and Moon.  
-* It updates the position of the sun to simulate the day/night cycle.  
-* It iterates through each asteroid, updating its position along its pre-calculated trajectory based on the current simulation time.  
-* It calls controls.update() for smooth camera movement.  
-* Finally, it renders the scene using the EffectComposer (for the bloom effect) and the labelRenderer.
-
-## **Future Improvements**
-
-* **More Accurate Orbits**: The current orbits are simplified for visualization. They could be replaced with more accurate orbital mechanics calculations.  
-* **Object Focusing**: Add the ability to click on an asteroid to focus the camera on it.  
-* **Sound Effects**: Add ambient sound effects for a more immersive experience.  
-* **Historical Data**: Allow users to view data from past dates.
+* **True HORIZONS Data:** Integrate with the JPL HORIZONS API to fetch *actual* real-time vector data for all objects instead of simulating positions.  
+* **More Objects:** Add dwarf planets (Pluto, Ceres, etc.) and a wider array of comets and asteroids.  
+* **Information Popups:** Make objects clickable to open a modal with detailed information and statistics (mass, radius, orbital period, etc.).  
+* **Higher-Fidelity Orbits:** Implement a more precise orbital solver (like a Kepler's equation solver) instead of the current mean anomaly approximation for more accurate non-circular orbits.
