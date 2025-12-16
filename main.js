@@ -130,6 +130,9 @@ class SolarSystem3D {
     setupRenderer() {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        // Enable shadows for better spacecraft detail
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.container.appendChild(this.renderer.domElement);
 
         this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -144,6 +147,8 @@ class SolarSystem3D {
         this.controls = new OrbitControls(this.camera, this.labelRenderer.domElement);
         this.controls.enableDamping = true;
         this.controls.maxDistance = 500000;
+        // Allow very close zoom for detailed spacecraft inspection
+        this.controls.minDistance = 0.1;
     }
 
     setupLoaders() {
@@ -157,9 +162,21 @@ class SolarSystem3D {
     }
 
     setupLighting() {
-        this.scene.add(new THREE.AmbientLight(0x404040, 0.3));
-        const hemiLight = new THREE.HemisphereLight(0x404040, 0x202040, 0.2);
+        this.scene.add(new THREE.AmbientLight(0x404040, 0.5));
+        const hemiLight = new THREE.HemisphereLight(0x404040, 0x202040, 0.3);
         this.scene.add(hemiLight);
+        
+        // Add directional light for better spacecraft detail visibility
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(1000, 1000, 1000);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        this.scene.add(dirLight);
+        
+        // Add point light near camera for close-up viewing
+        this.cameraLight = new THREE.PointLight(0xffffff, 1, 100);
+        this.camera.add(this.cameraLight);
     }
 
     initLoadingManager() {
@@ -634,17 +651,60 @@ class SolarSystem3D {
             this.gltfLoader.load(craft.modelFile, (gltf) => {
                 const model = gltf.scene;
                 const intendedScale = craft.scale || 0.5;
-                const finalScale = Math.max(intendedScale, this.MIN_SPACECRAFT_SCALE);
+                // Use larger scale for better visibility - spacecrafts are the focus
+                const finalScale = Math.max(intendedScale * 2, this.MIN_SPACECRAFT_SCALE * 2);
                 model.scale.setScalar(finalScale);
                 model.userData = { type: 'spacecraft', name: craft.name };
+                
+                // Improve spacecraft rendering quality
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        // Enable better lighting and shadows for detail
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        // Improve material quality
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(mat => {
+                                    if (mat) {
+                                        mat.needsUpdate = true;
+                                        mat.roughness = 0.7;
+                                        mat.metalness = 0.3;
+                                    }
+                                });
+                            } else {
+                                child.material.needsUpdate = true;
+                                child.material.roughness = 0.7;
+                                child.material.metalness = 0.3;
+                            }
+                        }
+                    }
+                });
 
                 const labelDiv = document.createElement('div');
                 labelDiv.className = 'planet-label';
                 labelDiv.textContent = craft.name;
                 labelDiv.style.cursor = 'pointer';
+                labelDiv.style.fontSize = '14px';
+                labelDiv.style.fontWeight = '600';
+                labelDiv.style.color = '#00ff88';
+                labelDiv.style.textShadow = '0 0 10px rgba(0, 255, 136, 0.8)';
                 const label = new CSS2DObject(labelDiv);
-                label.position.set(0, 10, 0);
+                // Position label higher for better visibility
+                label.position.set(0, 20, 0);
                 model.add(label);
+                
+                // Add a subtle glow/emissive effect to make spacecrafts stand out
+                const glowGeometry = new THREE.SphereGeometry(5, 16, 16);
+                const glowMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x00ff88,
+                    transparent: true,
+                    opacity: 0.2,
+                    side: THREE.BackSide
+                });
+                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                glow.scale.setScalar(1.5);
+                model.add(glow);
 
                 labelDiv.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -812,7 +872,7 @@ class SolarSystem3D {
             this.lastFocusPosition = null;
             this.controls.target.set(0, 0, 0);
             this.camera.position.set(0, 2500, 9000);
-            this.controls.minDistance = 0;
+            this.controls.minDistance = 0.1;
         });
 
         // Camera presets
@@ -1037,7 +1097,14 @@ class SolarSystem3D {
             }
         }
         if (spacecraft) {
-            fitDistance = fitDistance * 2;
+            // Allow much closer zoom for spacecrafts - they're the focus of the project
+            const spacecraftBox = new THREE.Box3().setFromObject(target);
+            const spacecraftSize = spacecraftBox.getSize(new THREE.Vector3());
+            const maxSize = Math.max(spacecraftSize.x, spacecraftSize.y, spacecraftSize.z);
+            // Zoom to 3x the size of the spacecraft for detailed viewing
+            fitDistance = maxSize * 3;
+            // Ensure minimum zoom distance is very small for close inspection
+            this.controls.minDistance = 0.1;
         }
 
         const offset = new THREE.Vector3().subVectors(this.camera.position, this.controls.target);
@@ -1045,7 +1112,13 @@ class SolarSystem3D {
         const newCameraPosition = center.clone().add(offset);
 
         this.camera.position.copy(newCameraPosition);
-        this.controls.minDistance = fitDistance;
+        // For spacecrafts, allow much closer zoom (0.1 minimum)
+        // For other objects, use calculated fitDistance
+        if (spacecraft) {
+            this.controls.minDistance = 0.1;
+        } else {
+            this.controls.minDistance = Math.max(fitDistance * 0.1, 0.1);
+        }
     }
 
     animate() {
@@ -1145,6 +1218,12 @@ class SolarSystem3D {
         }
 
         this.controls.update();
+        
+        // Update camera light position for close-up spacecraft viewing
+        if (this.cameraLight) {
+            this.cameraLight.position.set(0, 0, 0);
+        }
+        
         this.handleLabelClustering();
         this.renderer.render(this.scene, this.camera);
         this.labelRenderer.render(this.scene, this.camera);

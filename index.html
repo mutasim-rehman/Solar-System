@@ -607,6 +607,7 @@
             align-items: center;
             gap: 8px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 150;
         }
 
         .status-indicator {
@@ -985,7 +986,7 @@
             position: absolute;
             top: 20px;
             right: 200px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
             padding: 8px 16px;
@@ -994,6 +995,10 @@
             font-size: 12px;
             pointer-events: auto;
             transition: all 0.3s;
+            z-index: 150;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .theme-toggle:hover {
