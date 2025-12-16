@@ -1258,11 +1258,19 @@ class SolarSystem3D {
         const apiKeyModal = document.getElementById('api-key-modal');
         const apiKeyInput = document.getElementById('api-key-input');
         const apiKeySubmit = document.getElementById('api-key-submit');
+        const apiKeyBtn = document.getElementById('api-key-btn');
 
         const storedApiKey = localStorage.getItem('nasaApiKey');
         if (storedApiKey) {
             this.nasaApiKey = storedApiKey;
             this.connectToNasaApi();
+        }
+
+        // Button to open API key modal
+        if (apiKeyBtn) {
+            apiKeyBtn.addEventListener('click', () => {
+                this.showApiModal();
+            });
         }
 
         apiKeySubmit.addEventListener('click', () => {
@@ -1271,14 +1279,51 @@ class SolarSystem3D {
                 this.nasaApiKey = key;
                 localStorage.setItem('nasaApiKey', key);
                 this.connectToNasaApi();
-                apiKeyModal.style.opacity = '0';
-                apiKeyModal.addEventListener('transitionend', () => apiKeyModal.style.visibility = 'hidden', { once: true });
+                this.hideApiModal();
             }
         });
 
         apiKeyInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') apiKeySubmit.click();
         });
+
+        // Allow closing modal by clicking outside
+        apiKeyModal.addEventListener('click', (e) => {
+            if (e.target === apiKeyModal) {
+                this.hideApiModal();
+            }
+        });
+    }
+
+    showApiModal() {
+        const apiKeyModal = document.getElementById('api-key-modal');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const storedApiKey = localStorage.getItem('nasaApiKey');
+        
+        if (apiKeyModal) {
+            // Pre-fill with existing key if available
+            if (storedApiKey && apiKeyInput) {
+                apiKeyInput.value = storedApiKey;
+            } else if (apiKeyInput) {
+                apiKeyInput.value = '';
+            }
+            
+            apiKeyModal.style.visibility = 'visible';
+            apiKeyModal.style.opacity = '1';
+            if (apiKeyInput) {
+                setTimeout(() => apiKeyInput.focus(), 100);
+            }
+        }
+    }
+
+    hideApiModal() {
+        const apiKeyModal = document.getElementById('api-key-modal');
+        if (apiKeyModal) {
+            apiKeyModal.style.opacity = '0';
+            apiKeyModal.addEventListener('transitionend', () => {
+                apiKeyModal.style.visibility = 'hidden';
+            }, { once: true });
+        }
     }
 
     async connectToNasaApi() {
