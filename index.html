@@ -1004,6 +1004,250 @@
         .theme-toggle:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
+        /* Object Inspector Styles */
+        .object-inspector {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: flex;
+            pointer-events: auto;
+        }
+
+        .object-inspector.hidden {
+            display: none;
+        }
+
+        .inspector-left {
+            width: 50%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 20, 40, 0.9) 100%);
+        }
+
+        .inspector-3d-view {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #inspector-canvas {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+
+        .inspector-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .inspector-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .inspector-right {
+            width: 50%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .inspector-header {
+            padding: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .inspector-header h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .inspector-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .inspector-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .inspector-tab:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .inspector-tab.active {
+            color: white;
+            border-bottom-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .inspector-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .history-section, .literature-section {
+            margin-bottom: 30px;
+        }
+
+        .history-section h3, .literature-section h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #00ff88;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .history-section p, .literature-section p {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+
+        .timeline {
+            list-style: none;
+            padding: 0;
+        }
+
+        .timeline li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid #00ff88;
+            border-radius: 4px;
+        }
+
+        .timeline li strong {
+            color: #00ff88;
+        }
+
+        .literature-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .literature-section ul li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .missions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mission-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mission-item h4 {
+            color: #00ff88;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .mission-item p {
+            margin: 5px 0;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .mission-item p strong {
+            color: rgba(255, 255, 255, 0.9);
+        }
     </style>
 </head>
 <body>

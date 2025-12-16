@@ -18,6 +18,7 @@ import { Tooltip } from './js/Tooltip.js';
 import { SpeedIndicator } from './js/SpeedIndicator.js';
 import { EducationalOverlay } from './js/EducationalOverlay.js';
 import { DataExport } from './js/DataExport.js';
+import { ObjectInspector } from './js/ObjectInspector.js';
 
 class SolarSystem3D {
     constructor() {
@@ -65,6 +66,7 @@ class SolarSystem3D {
         this.speedIndicator = null;
         this.educationalOverlay = null;
         this.dataExport = null;
+        this.objectInspector = null;
 
         this.init();
     }
@@ -118,6 +120,7 @@ class SolarSystem3D {
         this.speedIndicator = new SpeedIndicator(this);
         this.educationalOverlay = new EducationalOverlay();
         this.dataExport = new DataExport(this);
+        this.objectInspector = new ObjectInspector(this);
         
         // Register service worker for PWA
         if ('serviceWorker' in navigator) {
@@ -361,7 +364,9 @@ class SolarSystem3D {
         // Add click handler
         labelDiv.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (this.infoPanel) {
+            if (this.objectInspector) {
+                this.objectInspector.inspect(mesh, config);
+            } else if (this.infoPanel) {
                 this.infoPanel.show(mesh, config);
             }
         });
@@ -467,7 +472,9 @@ class SolarSystem3D {
 
                 labelDiv.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (this.infoPanel) {
+                    if (this.objectInspector) {
+                        this.objectInspector.inspect(moonMesh, { name: moonData.name, real: moonData.real, type: 'moon' });
+                    } else if (this.infoPanel) {
                         this.infoPanel.show(moonMesh, { name: moonData.name, real: moonData.real, type: 'moon' });
                     }
                 });
@@ -588,7 +595,10 @@ class SolarSystem3D {
 
             labelDiv.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (this.infoPanel) {
+                const comet = this.comets.find(c => c.mesh === nucleus);
+                if (this.objectInspector && comet) {
+                    this.objectInspector.inspect(nucleus, { name: cometData.name, info: cometData.info, type: 'comet', real: comet.data });
+                } else if (this.infoPanel) {
                     this.infoPanel.show(nucleus, { name: cometData.name, info: cometData.info, type: 'comet', distance: cometData.distance, eccentricity: cometData.eccentricity, period: cometData.period });
                 }
             });
@@ -708,7 +718,10 @@ class SolarSystem3D {
 
                 labelDiv.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (this.infoPanel) {
+                    const spacecraft = this.spacecraft.find(s => s.model === model);
+                    if (this.objectInspector && spacecraft) {
+                        this.objectInspector.inspect(model, { name: craft.name, type: 'spacecraft', real: spacecraft.data });
+                    } else if (this.infoPanel) {
                         this.infoPanel.show(model, { name: craft.name, type: 'spacecraft' });
                     }
                 });
@@ -773,7 +786,10 @@ class SolarSystem3D {
 
         labelDiv.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (this.infoPanel) {
+            const spacecraft = this.spacecraft.find(s => s.model === mesh);
+            if (this.objectInspector && spacecraft) {
+                this.objectInspector.inspect(mesh, { name: craft.name, type: 'spacecraft', real: spacecraft.data });
+            } else if (this.infoPanel) {
                 this.infoPanel.show(mesh, { name: craft.name, type: 'spacecraft' });
             }
         });
@@ -968,24 +984,48 @@ class SolarSystem3D {
                 const obj = intersects[0].object;
                 if (obj.userData && this.infoPanel) {
                     const data = obj.userData;
-                    if (data.type === 'planet' || data.type === 'star') {
-                        const body = this.celestialBodies.find(b => b.mesh === obj);
-                        if (body) {
-                            this.infoPanel.show(obj, body.data);
+                    if (this.objectInspector) {
+                        // Use inspector for all objects
+                        if (data.type === 'planet' || data.type === 'star') {
+                            const body = this.celestialBodies.find(b => b.mesh === obj);
+                            if (body) {
+                                this.objectInspector.inspect(obj, body.data);
+                            }
+                        } else if (data.type === 'moon') {
+                            this.objectInspector.inspect(obj, { name: data.name, real: data.real, type: 'moon' });
+                        } else if (data.type === 'comet') {
+                            const comet = this.comets.find(c => c.mesh === obj);
+                            if (comet) {
+                                this.objectInspector.inspect(obj, { name: data.name, info: data.info, type: 'comet', real: comet.data });
+                            }
+                        } else if (data.type === 'spacecraft') {
+                            const spacecraft = this.spacecraft.find(s => s.model === obj);
+                            if (spacecraft) {
+                                this.objectInspector.inspect(obj, { name: data.name, type: 'spacecraft', real: spacecraft.data });
+                            }
+                        }
+                        if (this.speedIndicator) this.speedIndicator.update(obj);
+                    } else {
+                        // Fallback to info panel
+                        if (data.type === 'planet' || data.type === 'star') {
+                            const body = this.celestialBodies.find(b => b.mesh === obj);
+                            if (body) {
+                                this.infoPanel.show(obj, body.data);
+                                if (this.speedIndicator) this.speedIndicator.update(obj);
+                            }
+                        } else if (data.type === 'moon') {
+                            this.infoPanel.show(obj, { name: data.name, real: data.real, type: 'moon' });
+                            if (this.speedIndicator) this.speedIndicator.update(obj);
+                        } else if (data.type === 'comet') {
+                            const comet = this.comets.find(c => c.mesh === obj);
+                            if (comet) {
+                                this.infoPanel.show(obj, { name: data.name, info: data.info, type: 'comet' });
+                                if (this.speedIndicator) this.speedIndicator.update(obj);
+                            }
+                        } else if (data.type === 'spacecraft') {
+                            this.infoPanel.show(obj, { name: data.name, type: 'spacecraft' });
                             if (this.speedIndicator) this.speedIndicator.update(obj);
                         }
-                    } else if (data.type === 'moon') {
-                        this.infoPanel.show(obj, { name: data.name, real: data.real, type: 'moon' });
-                        if (this.speedIndicator) this.speedIndicator.update(obj);
-                    } else if (data.type === 'comet') {
-                        const comet = this.comets.find(c => c.mesh === obj);
-                        if (comet) {
-                            this.infoPanel.show(obj, { name: data.name, info: data.info, type: 'comet' });
-                            if (this.speedIndicator) this.speedIndicator.update(obj);
-                        }
-                    } else if (data.type === 'spacecraft') {
-                        this.infoPanel.show(obj, { name: data.name, type: 'spacecraft' });
-                        if (this.speedIndicator) this.speedIndicator.update(obj);
                     }
                 }
             } else {

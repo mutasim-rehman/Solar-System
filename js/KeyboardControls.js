@@ -22,7 +22,8 @@ export class KeyboardControls {
             's': () => this.takeScreenshot(),
             'b': () => this.toggleBookmark(),
             'c': () => this.toggleComparison(),
-            'd': () => this.toggleDistanceTool()
+            'd': () => this.toggleDistanceTool(),
+            'Escape': () => this.closeInspector()
         };
 
         this.init();
@@ -121,6 +122,12 @@ export class KeyboardControls {
     toggleDistanceTool() {
         if (this.solarSystem.distanceTool) {
             this.solarSystem.distanceTool.toggle();
+        }
+    }
+
+    closeInspector() {
+        if (this.solarSystem.objectInspector && this.solarSystem.objectInspector.isActive) {
+            this.solarSystem.objectInspector.close();
         }
     }
 }
