@@ -14,10 +14,6 @@ import { DistanceTool } from './js/DistanceTool.js';
 import { ComparisonTool } from './js/ComparisonTool.js';
 import { Screenshot } from './js/Screenshot.js';
 import { DatePicker } from './js/DatePicker.js';
-import { Tooltip } from './js/Tooltip.js';
-import { SpeedIndicator } from './js/SpeedIndicator.js';
-import { EducationalOverlay } from './js/EducationalOverlay.js';
-import { DataExport } from './js/DataExport.js';
 
 class SolarSystem3D {
     constructor() {
@@ -61,10 +57,6 @@ class SolarSystem3D {
         this.screenshot = null;
         this.datePicker = null;
         this.keyboardControls = null;
-        this.tooltip = null;
-        this.speedIndicator = null;
-        this.educationalOverlay = null;
-        this.dataExport = null;
 
         this.init();
     }
@@ -114,17 +106,12 @@ class SolarSystem3D {
         this.screenshot = new Screenshot(this);
         this.datePicker = new DatePicker(this);
         this.keyboardControls = new KeyboardControls(this);
-        this.tooltip = new Tooltip();
-        this.speedIndicator = new SpeedIndicator(this);
-        this.educationalOverlay = new EducationalOverlay();
-        this.dataExport = new DataExport(this);
         
-        // Register service worker for PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js').catch(err => {
-                console.log('Service worker registration failed:', err);
-            });
-        }
+        // Make modules accessible
+        this.bookmarkManager = this.bookmarkManager;
+        this.distanceTool = this.distanceTool;
+        this.comparisonTool = this.comparisonTool;
+        this.screenshot = this.screenshot;
     }
 
     setupRenderer() {
@@ -848,18 +835,6 @@ class SolarSystem3D {
             }
         });
 
-        document.getElementById('export-json-btn')?.addEventListener('click', () => {
-            if (this.dataExport) {
-                this.dataExport.exportToJSON();
-            }
-        });
-
-        document.getElementById('export-csv-btn')?.addEventListener('click', () => {
-            if (this.dataExport) {
-                this.dataExport.exportToCSV();
-            }
-        });
-
         // Theme toggle
         document.getElementById('theme-toggle')?.addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
@@ -912,24 +887,18 @@ class SolarSystem3D {
                         const body = this.celestialBodies.find(b => b.mesh === obj);
                         if (body) {
                             this.infoPanel.show(obj, body.data);
-                            if (this.speedIndicator) this.speedIndicator.update(obj);
                         }
                     } else if (data.type === 'moon') {
                         this.infoPanel.show(obj, { name: data.name, real: data.real, type: 'moon' });
-                        if (this.speedIndicator) this.speedIndicator.update(obj);
                     } else if (data.type === 'comet') {
                         const comet = this.comets.find(c => c.mesh === obj);
                         if (comet) {
                             this.infoPanel.show(obj, { name: data.name, info: data.info, type: 'comet' });
-                            if (this.speedIndicator) this.speedIndicator.update(obj);
                         }
                     } else if (data.type === 'spacecraft') {
                         this.infoPanel.show(obj, { name: data.name, type: 'spacecraft' });
-                        if (this.speedIndicator) this.speedIndicator.update(obj);
                     }
                 }
-            } else {
-                if (this.speedIndicator) this.speedIndicator.hide();
             }
         });
     }

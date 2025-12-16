@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="textures/blue_marble.png" type="image/png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
     <title>Eyes on Solar System</title>
     <style>
         /* General Styles */
@@ -667,6 +669,336 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.5);
         }
+
+        /* FPS Counter */
+        #fps-counter {
+            position: absolute;
+            top: 90px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            pointer-events: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 400px;
+            max-height: 80vh;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            pointer-events: auto;
+            z-index: 200;
+            overflow-y: auto;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .info-panel.hidden {
+            transform: translateX(120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .info-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .info-panel-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .info-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .info-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section h4 {
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-table td:first-child {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            width: 40%;
+        }
+
+        /* Bookmark Panel */
+        .bookmark-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .bookmark-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .bookmark-name {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .bookmark-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .bookmark-load, .bookmark-delete {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+
+        .bookmark-load:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .bookmark-delete:hover {
+            background: rgba(255, 0, 0, 0.3);
+        }
+
+        /* Comparison Tool */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+        }
+
+        /* Date Picker */
+        .date-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            font-size: 13px;
+        }
+
+        .date-presets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .date-preset-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+
+        .date-preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Camera Presets */
+        .camera-presets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Help Panel */
+        #help-panel {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            max-width: 90vw;
+            max-height: 80vh;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 30px;
+            pointer-events: auto;
+            z-index: 300;
+            overflow-y: auto;
+        }
+
+        #help-panel.hidden {
+            display: none;
+        }
+
+        .help-section {
+            margin-bottom: 20px;
+        }
+
+        .help-section h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+
+        .help-shortcut {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .help-key {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Speed Indicator */
+        .speed-indicator {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            pointer-events: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Zoom Indicator */
+        .zoom-indicator {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            pointer-events: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 200px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            pointer-events: auto;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -694,6 +1026,7 @@
                 <div class="subtitle">Real-Time Planetary Positions & Spacecraft Tracking</div>
             </div>
             <div class="header-right">
+                <button class="theme-toggle" id="theme-toggle">🌙 Dark</button>
                 <button class="menu-toggle" id="toggle-panels">Hide Panels</button>
             </div>
         </div>
@@ -727,6 +1060,12 @@
                 <button class="control-btn active" id="toggle-orbits">Orbital Paths</button>
                 <button class="control-btn" id="toggle-labels">Object Labels</button>
                 <button class="control-btn" id="reset-view">Reset View</button>
+                <div class="camera-presets" style="margin-top: 10px;">
+                    <button class="preset-btn" data-preset="overview">Overview</button>
+                    <button class="preset-btn" data-preset="innerPlanets">Inner Planets</button>
+                    <button class="preset-btn" data-preset="gasGiants">Gas Giants</button>
+                    <button class="preset-btn" data-preset="asteroidBelt">Asteroid Belt</button>
+                </div>
             </div>
 
             <div class="panel">
@@ -737,6 +1076,15 @@
                     <button class="control-btn active" id="toggle-spacecraft">Spacecraft</button>
                     <button class="control-btn" id="toggle-comets">Comets</button>
                 </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Tools</div>
+                <button class="control-btn" id="toggle-distance-tool">Distance Tool (D)</button>
+                <button class="control-btn" id="toggle-comparison">Comparison (C)</button>
+                <button class="control-btn" id="screenshot-btn">Screenshot (S)</button>
+                <button class="control-btn" id="export-json-btn">Export JSON</button>
+                <button class="control-btn" id="export-csv-btn">Export CSV</button>
             </div>
         </div>
 
@@ -760,6 +1108,43 @@
                         <strong>Last Update:</strong> <span id="last-update">Connecting...</span>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div id="fps-counter">FPS: --</div>
+        <div id="speed-indicator" class="speed-indicator hidden">Speed: -- km/s</div>
+        <div id="zoom-indicator" class="zoom-indicator hidden">Zoom: --</div>
+
+        <div id="help-panel" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Keyboard Shortcuts</h2>
+                <button class="info-close" onclick="document.getElementById('help-panel').classList.add('hidden')">×</button>
+            </div>
+            <div class="help-section">
+                <h3>Navigation</h3>
+                <div class="help-shortcut"><span>Reset View</span><span class="help-key">R</span></div>
+                <div class="help-shortcut"><span>Focus Sun</span><span class="help-key">1</span></div>
+                <div class="help-shortcut"><span>Focus Mercury</span><span class="help-key">2</span></div>
+                <div class="help-shortcut"><span>Focus Venus</span><span class="help-key">3</span></div>
+                <div class="help-shortcut"><span>Focus Earth</span><span class="help-key">4</span></div>
+                <div class="help-shortcut"><span>Focus Mars</span><span class="help-key">5</span></div>
+                <div class="help-shortcut"><span>Focus Jupiter</span><span class="help-key">6</span></div>
+                <div class="help-shortcut"><span>Focus Saturn</span><span class="help-key">7</span></div>
+                <div class="help-shortcut"><span>Focus Uranus</span><span class="help-key">8</span></div>
+                <div class="help-shortcut"><span>Focus Neptune</span><span class="help-key">9</span></div>
+            </div>
+            <div class="help-section">
+                <h3>Controls</h3>
+                <div class="help-shortcut"><span>Pause/Play</span><span class="help-key">Space</span></div>
+                <div class="help-shortcut"><span>Toggle Orbits</span><span class="help-key">O</span></div>
+                <div class="help-shortcut"><span>Toggle Labels</span><span class="help-key">L</span></div>
+                <div class="help-shortcut"><span>Increase Speed</span><span class="help-key">↑</span></div>
+                <div class="help-shortcut"><span>Decrease Speed</span><span class="help-key">↓</span></div>
+                <div class="help-shortcut"><span>Distance Tool</span><span class="help-key">D</span></div>
+                <div class="help-shortcut"><span>Comparison Tool</span><span class="help-key">C</span></div>
+                <div class="help-shortcut"><span>Screenshot</span><span class="help-key">S</span></div>
+                <div class="help-shortcut"><span>Bookmark</span><span class="help-key">B</span></div>
+                <div class="help-shortcut"><span>Help</span><span class="help-key">H</span></div>
             </div>
         </div>
 
@@ -799,5 +1184,24 @@
     </script>
 
     <script type="module" src="main.js"></script>
+    <script>
+        // Add light theme styles
+        const style = document.createElement('style');
+        style.textContent = `
+            body.light-theme {
+                background: #f0f0f0;
+                color: #000;
+            }
+            body.light-theme .panel {
+                background: rgba(255, 255, 255, 0.95);
+                color: #000;
+            }
+            body.light-theme .control-btn {
+                background: rgba(240, 240, 240, 0.9);
+                color: #000;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

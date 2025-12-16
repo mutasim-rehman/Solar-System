@@ -1,0 +1,23 @@
+{
+  "name": "Solar System Explorer",
+  "short_name": "Solar System",
+  "description": "Interactive 3D visualization of the solar system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "textures/blue_marble.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "textures/blue_marble.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
