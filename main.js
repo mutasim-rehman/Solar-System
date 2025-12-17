@@ -614,7 +614,7 @@ class SolarSystem3D {
                 transparent: true,
                 opacity: 0.35,
                 emissive: 0x003366,
-                emissiveIntensity: 0.25
+                emissiveIntensity: 0.08  // Reduced from 0.25
             });
             const coma = new THREE.Mesh(comaGeometry, comaMaterial);
             nucleus.add(coma);
@@ -781,7 +781,7 @@ class SolarSystem3D {
                 labelDiv.style.fontSize = '14px';
                 labelDiv.style.fontWeight = '600';
                 labelDiv.style.color = '#00ff88';
-                labelDiv.style.textShadow = '0 0 10px rgba(0, 255, 136, 0.8)';
+                labelDiv.style.textShadow = '0 0 3px rgba(0, 255, 136, 0.3)';  // Reduced glow
                 const label = new CSS2DObject(labelDiv);
                 // Position label higher for better visibility
                 label.position.set(0, 20, 0);
@@ -792,11 +792,11 @@ class SolarSystem3D {
                 const glowMaterial = new THREE.MeshBasicMaterial({
                     color: 0x00ff88,
                     transparent: true,
-                    opacity: 0.2,
+                    opacity: 0.05,  // Reduced from 0.2
                     side: THREE.BackSide
                 });
                 const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-                glow.scale.setScalar(1.5);
+                glow.scale.setScalar(1.2);  // Reduced from 1.5
                 model.add(glow);
 
                 labelDiv.addEventListener('click', (e) => {
@@ -849,7 +849,7 @@ class SolarSystem3D {
 
     createSpacecraftPlaceholder(craft) {
         const geometry = new THREE.SphereGeometry(2, 8, 6);
-        const material = new THREE.MeshStandardMaterial({ color: 0x888888, emissive: 0x444444, emissiveIntensity: 0.5 });
+        const material = new THREE.MeshStandardMaterial({ color: 0x888888, emissive: 0x222222, emissiveIntensity: 0.1 });  // Reduced emissive
         const mesh = new THREE.Mesh(geometry, material);
         mesh.userData = { type: 'spacecraft', name: craft.name };
 

@@ -32,9 +32,9 @@ export class PostProcessing {
             // Bloom pass for stars and bright objects
             this.bloomPass = new UnrealBloomPass(
                 new THREE.Vector2(window.innerWidth, window.innerHeight),
-                1.5,  // strength
-                0.4,  // radius
-                0.85  // threshold
+                0.3,  // strength - reduced from 1.5
+                0.2,  // radius - reduced from 0.4
+                0.95  // threshold - increased from 0.85 (less bloom)
             );
             this.composer.addPass(this.bloomPass);
             
