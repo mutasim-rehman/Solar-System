@@ -1,9 +1,5 @@
 // Post-processing effects system (Bloom, Lens Flare, etc.)
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { Lensflare, LensflareElement } from 'three/addons/objects/Lensflare.js';
+import * as THREE from 'three';
 
 export class PostProcessing {
     constructor(renderer, scene, camera) {
@@ -13,36 +9,53 @@ export class PostProcessing {
         this.composer = null;
         this.bloomPass = null;
         this.enabled = true;
-        this.init();
+        // Initialize asynchronously without blocking
+        this.init().catch(err => {
+            console.warn('PostProcessing failed to initialize:', err);
+        });
     }
 
-    init() {
-        // Create effect composer
-        this.composer = new EffectComposer(this.renderer);
-        
-        // Render pass
-        const renderPass = new RenderPass(this.scene, this.camera);
-        this.composer.addPass(renderPass);
-        
-        // Bloom pass for stars and bright objects
-        this.bloomPass = new UnrealBloomPass(
-            new THREE.Vector2(window.innerWidth, window.innerHeight),
-            1.5,  // strength
-            0.4,  // radius
-            0.85  // threshold
-        );
-        this.composer.addPass(this.bloomPass);
-        
-        // Color grading pass
-        const colorGradingPass = this.createColorGradingPass();
-        if (colorGradingPass) {
-            this.composer.addPass(colorGradingPass);
+    async init() {
+        try {
+            // Dynamically import post-processing modules
+            const { EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js');
+            const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
+            const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
+            
+            // Create effect composer
+            this.composer = new EffectComposer(this.renderer);
+            
+            // Render pass
+            const renderPass = new RenderPass(this.scene, this.camera);
+            this.composer.addPass(renderPass);
+            
+            // Bloom pass for stars and bright objects
+            this.bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                1.5,  // strength
+                0.4,  // radius
+                0.85  // threshold
+            );
+            this.composer.addPass(this.bloomPass);
+            
+            // Color grading pass
+            const colorGradingPass = await this.createColorGradingPass();
+            if (colorGradingPass) {
+                this.composer.addPass(colorGradingPass);
+            }
+        } catch (error) {
+            console.warn('Post-processing initialization failed, continuing without effects:', error);
+            this.enabled = false;
+            this.composer = null;
         }
     }
 
-    createColorGradingPass() {
-        // Simple color grading shader
-        const colorGradingShader = {
+    async createColorGradingPass() {
+        try {
+            const { ShaderPass } = await import('three/addons/postprocessing/ShaderPass.js');
+            
+            // Simple color grading shader
+            const colorGradingShader = {
             uniforms: {
                 tDiffuse: { value: null },
                 exposure: { value: 1.0 },
@@ -80,28 +93,38 @@ export class PostProcessing {
                     gl_FragColor = vec4(color, texel.a);
                 }
             `
-        };
-        
-        const pass = new ShaderPass(colorGradingShader);
-        pass.renderToScreen = true;
-        return pass;
+            };
+            
+            const pass = new ShaderPass(colorGradingShader);
+            pass.renderToScreen = true;
+            return pass;
+        } catch (error) {
+            console.warn('Color grading pass creation failed:', error);
+            return null;
+        }
     }
 
-    addLensFlare(light, color = 0xffffff, size = 100) {
-        const textureLoader = new THREE.TextureLoader();
-        const textureFlare0 = textureLoader.load('textures/lensflare/lensflare0.png');
-        const textureFlare3 = textureLoader.load('textures/lensflare/lensflare3.png');
-        
-        const lensflare = new Lensflare();
-        
-        lensflare.addElement(new LensflareElement(textureFlare0, 512, 0, color));
-        lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6, color));
-        lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7, color));
-        lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9, color));
-        lensflare.addElement(new LensflareElement(textureFlare3, 70, 1.0, color));
-        
-        light.add(lensflare);
-        return lensflare;
+    async addLensFlare(light, color = 0xffffff, size = 100) {
+        try {
+            const { Lensflare, LensflareElement } = await import('three/addons/objects/Lensflare.js');
+            const textureLoader = new THREE.TextureLoader();
+            const textureFlare0 = textureLoader.load('textures/lensflare/lensflare0.png');
+            const textureFlare3 = textureLoader.load('textures/lensflare/lensflare3.png');
+            
+            const lensflare = new Lensflare();
+            
+            lensflare.addElement(new LensflareElement(textureFlare0, 512, 0, color));
+            lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6, color));
+            lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7, color));
+            lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9, color));
+            lensflare.addElement(new LensflareElement(textureFlare3, 70, 1.0, color));
+            
+            light.add(lensflare);
+            return lensflare;
+        } catch (error) {
+            console.warn('Lens flare creation failed:', error);
+            return null;
+        }
     }
 
     setBloomStrength(strength) {

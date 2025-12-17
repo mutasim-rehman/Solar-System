@@ -94,15 +94,23 @@ export class MissionPathVisualizer {
         marker.userData.index = index;
 
         // Add label
-        const labelDiv = document.createElement('div');
-        labelDiv.className = 'waypoint-label';
-        labelDiv.textContent = waypoint.name || `Waypoint ${index + 1}`;
-        labelDiv.style.color = `#${color.toString(16).padStart(6, '0')}`;
-        
-        const { CSS2DObject } = require('three/addons/renderers/CSS2DRenderer.js');
-        const label = new CSS2DObject(labelDiv);
-        label.position.set(0, 10, 0);
-        marker.add(label);
+        try {
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'waypoint-label';
+            labelDiv.textContent = waypoint.name || `Waypoint ${index + 1}`;
+            labelDiv.style.color = `#${color.toString(16).padStart(6, '0')}`;
+            
+            // Import CSS2DObject dynamically
+            import('three/addons/renderers/CSS2DRenderer.js').then(({ CSS2DObject }) => {
+                const label = new CSS2DObject(labelDiv);
+                label.position.set(0, 10, 0);
+                marker.add(label);
+            }).catch(err => {
+                console.warn('Failed to create waypoint label:', err);
+            });
+        } catch (error) {
+            console.warn('Waypoint label creation failed:', error);
+        }
 
         return marker;
     }

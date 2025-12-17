@@ -9,13 +9,22 @@ export class ConstellationOverlay {
         this.stars = [];
         this.starField = null;
         this.visible = false;
-        this.init();
+        // Initialize asynchronously without blocking
+        this.init().catch(err => {
+            console.warn('ConstellationOverlay failed to initialize:', err);
+        });
     }
 
     async init() {
-        await this.loadStarCatalog();
-        this.createStarField();
-        this.loadConstellations();
+        try {
+            await this.loadStarCatalog();
+            this.createStarField();
+            this.loadConstellations();
+        } catch (error) {
+            console.warn('ConstellationOverlay initialization error:', error);
+            // Continue without constellations if loading fails
+            this.stars = [];
+        }
     }
 
     async loadStarCatalog() {
@@ -172,17 +181,25 @@ export class ConstellationOverlay {
         points.forEach(p => center.add(p));
         center.divideScalar(points.length);
 
-        const labelDiv = document.createElement('div');
-        labelDiv.className = 'constellation-label';
-        labelDiv.textContent = name;
-        labelDiv.style.color = `#${color.toString(16).padStart(6, '0')}`;
-        labelDiv.style.fontSize = '12px';
-        labelDiv.style.fontWeight = 'bold';
+        try {
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'constellation-label';
+            labelDiv.textContent = name;
+            labelDiv.style.color = `#${color.toString(16).padStart(6, '0')}`;
+            labelDiv.style.fontSize = '12px';
+            labelDiv.style.fontWeight = 'bold';
 
-        const { CSS2DObject } = require('three/addons/renderers/CSS2DRenderer.js');
-        const label = new CSS2DObject(labelDiv);
-        label.position.copy(center);
-        lines.add(label);
+            // Import CSS2DObject dynamically
+            import('three/addons/renderers/CSS2DRenderer.js').then(({ CSS2DObject }) => {
+                const label = new CSS2DObject(labelDiv);
+                label.position.copy(center);
+                lines.add(label);
+            }).catch(err => {
+                console.warn('Failed to create constellation label:', err);
+            });
+        } catch (error) {
+            console.warn('Constellation label creation failed:', error);
+        }
 
         this.scene.add(lines);
         this.constellations.set(name, { lines, stars, color });

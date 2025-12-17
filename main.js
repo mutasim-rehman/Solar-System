@@ -125,7 +125,14 @@ class SolarSystem3D {
             this.animate();
         } catch (error) {
             console.error('Initialization error:', error);
-            this.showError('Failed to initialize. Please refresh the page.');
+            console.error('Error stack:', error.stack);
+            console.error('Error details:', {
+                message: error.message,
+                name: error.name,
+                fileName: error.fileName,
+                lineNumber: error.lineNumber
+            });
+            this.showError(`Failed to initialize: ${error.message}. Check console for details.`);
         }
     }
 
@@ -144,13 +151,47 @@ class SolarSystem3D {
         this.objectInspector = new ObjectInspector(this);
         this.orbitalWorker = new OrbitalWorker();
         this.lodSystem = new LODSystem(this);
-        this.pbrMaterials = new PBRMaterials(this.textureLoader);
-        this.postProcessing = new PostProcessing(this.renderer, this.scene, this.camera);
-        this.atmosphericScattering = new AtmosphericScattering();
-        this.particleSystems = new ParticleSystems(this.scene);
-        this.multiSourceAPI = new MultiSourceAPI();
-        this.missionPathVisualizer = new MissionPathVisualizer(this.scene);
-        this.constellationOverlay = new ConstellationOverlay(this.scene, this.camera);
+        try {
+            this.pbrMaterials = new PBRMaterials(this.textureLoader);
+        } catch (error) {
+            console.warn('PBRMaterials initialization failed:', error);
+        }
+        
+        try {
+            this.postProcessing = new PostProcessing(this.renderer, this.scene, this.camera);
+        } catch (error) {
+            console.warn('PostProcessing initialization failed:', error);
+        }
+        
+        try {
+            this.atmosphericScattering = new AtmosphericScattering();
+        } catch (error) {
+            console.warn('AtmosphericScattering initialization failed:', error);
+        }
+        
+        try {
+            this.particleSystems = new ParticleSystems(this.scene);
+        } catch (error) {
+            console.warn('ParticleSystems initialization failed:', error);
+        }
+        
+        try {
+            this.multiSourceAPI = new MultiSourceAPI();
+        } catch (error) {
+            console.warn('MultiSourceAPI initialization failed:', error);
+        }
+        
+        try {
+            this.missionPathVisualizer = new MissionPathVisualizer(this.scene);
+        } catch (error) {
+            console.warn('MissionPathVisualizer initialization failed:', error);
+        }
+        
+        try {
+            this.constellationOverlay = new ConstellationOverlay(this.scene, this.camera);
+        } catch (error) {
+            console.warn('ConstellationOverlay initialization failed:', error);
+        }
         
         // Register service worker for PWA
         if ('serviceWorker' in navigator) {
