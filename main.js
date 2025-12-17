@@ -966,7 +966,7 @@ class SolarSystem3D {
                 });
         });
 
-        // Click handler for objects
+        // Click handler for objects (planets, moons, spacecraft, comets)
         this.labelRenderer.domElement.addEventListener('click', (e) => {
             const mouse = new THREE.Vector2();
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -974,62 +974,75 @@ class SolarSystem3D {
 
             this.raycaster.setFromCamera(mouse, this.camera);
             const intersects = this.raycaster.intersectObjects(
-                [...this.celestialBodies.map(b => b.mesh),
-                 ...this.spacecraft.map(s => s.model),
-                 ...this.comets.map(c => c.mesh)],
+                [
+                    ...this.celestialBodies.map(b => b.mesh),
+                    ...this.spacecraft.map(s => s.model),
+                    ...this.comets.map(c => c.mesh)
+                ],
                 true
             );
 
-            if (intersects.length > 0) {
-                const obj = intersects[0].object;
-                if (obj.userData && this.infoPanel) {
-                    const data = obj.userData;
-                    if (this.objectInspector) {
-                        // Use inspector for all objects
-                        if (data.type === 'planet' || data.type === 'star') {
-                            const body = this.celestialBodies.find(b => b.mesh === obj);
-                            if (body) {
-                                this.objectInspector.inspect(obj, body.data);
-                            }
-                        } else if (data.type === 'moon') {
-                            this.objectInspector.inspect(obj, { name: data.name, real: data.real, type: 'moon' });
-                        } else if (data.type === 'comet') {
-                            const comet = this.comets.find(c => c.mesh === obj);
-                            if (comet) {
-                                this.objectInspector.inspect(obj, { name: data.name, info: data.info, type: 'comet', real: comet.data });
-                            }
-                        } else if (data.type === 'spacecraft') {
-                            const spacecraft = this.spacecraft.find(s => s.model === obj);
-                            if (spacecraft) {
-                                this.objectInspector.inspect(obj, { name: data.name, type: 'spacecraft', real: spacecraft.data });
-                            }
-                        }
-                        if (this.speedIndicator) this.speedIndicator.update(obj);
-                    } else {
-                        // Fallback to info panel
-                        if (data.type === 'planet' || data.type === 'star') {
-                            const body = this.celestialBodies.find(b => b.mesh === obj);
-                            if (body) {
-                                this.infoPanel.show(obj, body.data);
-                                if (this.speedIndicator) this.speedIndicator.update(obj);
-                            }
-                        } else if (data.type === 'moon') {
-                            this.infoPanel.show(obj, { name: data.name, real: data.real, type: 'moon' });
-                            if (this.speedIndicator) this.speedIndicator.update(obj);
-                        } else if (data.type === 'comet') {
-                            const comet = this.comets.find(c => c.mesh === obj);
-                            if (comet) {
-                                this.infoPanel.show(obj, { name: data.name, info: data.info, type: 'comet' });
-                                if (this.speedIndicator) this.speedIndicator.update(obj);
-                            }
-                        } else if (data.type === 'spacecraft') {
-                            this.infoPanel.show(obj, { name: data.name, type: 'spacecraft' });
-                            if (this.speedIndicator) this.speedIndicator.update(obj);
-                        }
+            if (intersects.length === 0) {
+                if (this.speedIndicator) this.speedIndicator.hide();
+                return;
+            }
+
+            // Walk up the hierarchy to find the root object that has userData
+            let picked = intersects[0].object;
+            while (picked.parent && picked.parent !== this.scene && (!picked.userData || !picked.userData.type)) {
+                picked = picked.parent;
+            }
+
+            const data = picked.userData;
+            if (!data) {
+                return;
+            }
+
+            const targetObject = picked;
+
+            if (this.objectInspector) {
+                // Use inspector for all objects
+                if (data.type === 'planet' || data.type === 'star') {
+                    const body = this.celestialBodies.find(b => b.mesh === targetObject);
+                    if (body) {
+                        this.objectInspector.inspect(targetObject, body.data);
+                    }
+                } else if (data.type === 'moon') {
+                    this.objectInspector.inspect(targetObject, { name: data.name, real: data.real, type: 'moon' });
+                } else if (data.type === 'comet') {
+                    const comet = this.comets.find(c => c.mesh === targetObject);
+                    if (comet) {
+                        this.objectInspector.inspect(targetObject, { name: data.name, info: data.info, type: 'comet', real: comet.data });
+                    }
+                } else if (data.type === 'spacecraft') {
+                    const spacecraft = this.spacecraft.find(s => s.model === targetObject);
+                    if (spacecraft) {
+                        this.objectInspector.inspect(targetObject, { name: data.name, type: 'spacecraft', real: spacecraft.data });
                     }
                 }
-            } else {
-                if (this.speedIndicator) this.speedIndicator.hide();
+
+                if (this.speedIndicator) this.speedIndicator.update(targetObject);
+            } else if (this.infoPanel) {
+                // Fallback to info panel if inspector is not available
+                if (data.type === 'planet' || data.type === 'star') {
+                    const body = this.celestialBodies.find(b => b.mesh === targetObject);
+                    if (body) {
+                        this.infoPanel.show(targetObject, body.data);
+                        if (this.speedIndicator) this.speedIndicator.update(targetObject);
+                    }
+                } else if (data.type === 'moon') {
+                    this.infoPanel.show(targetObject, { name: data.name, real: data.real, type: 'moon' });
+                    if (this.speedIndicator) this.speedIndicator.update(targetObject);
+                } else if (data.type === 'comet') {
+                    const comet = this.comets.find(c => c.mesh === targetObject);
+                    if (comet) {
+                        this.infoPanel.show(targetObject, { name: data.name, info: data.info, type: 'comet' });
+                        if (this.speedIndicator) this.speedIndicator.update(targetObject);
+                    }
+                } else if (data.type === 'spacecraft') {
+                    this.infoPanel.show(targetObject, { name: data.name, type: 'spacecraft' });
+                    if (this.speedIndicator) this.speedIndicator.update(targetObject);
+                }
             }
         });
     }

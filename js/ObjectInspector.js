@@ -115,14 +115,13 @@ export class ObjectInspector {
         const box = new THREE.Box3().setFromObject(clonedObject);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
-        const maxSize = Math.max(size.x, size.y, size.z);
+        const maxSize = Math.max(size.x, size.y, size.z, 1e-6);
         
         // Scale to fit in view
         const scale = 8 / maxSize;
+        // First move the object so its center is at the origin, then scale
+        clonedObject.position.sub(center);
         clonedObject.scale.multiplyScalar(scale);
-        
-        // Center the object
-        clonedObject.position.sub(center.multiplyScalar(scale));
         
         // Create group for rotation
         this.inspectionGroup = new THREE.Group();
