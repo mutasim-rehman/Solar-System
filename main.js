@@ -19,6 +19,15 @@ import { SpeedIndicator } from './js/SpeedIndicator.js';
 import { EducationalOverlay } from './js/EducationalOverlay.js';
 import { DataExport } from './js/DataExport.js';
 import { ObjectInspector } from './js/ObjectInspector.js';
+import { OrbitalWorker } from './js/OrbitalWorker.js';
+import { LODSystem } from './js/LODSystem.js';
+import { PBRMaterials } from './js/PBRMaterials.js';
+import { PostProcessing } from './js/PostProcessing.js';
+import { AtmosphericScattering } from './js/AtmosphericScattering.js';
+import { ParticleSystems } from './js/ParticleSystems.js';
+import { MultiSourceAPI } from './js/MultiSourceAPI.js';
+import { MissionPathVisualizer } from './js/MissionPathVisualizer.js';
+import { ConstellationOverlay } from './js/ConstellationOverlay.js';
 
 class SolarSystem3D {
     constructor() {
@@ -67,6 +76,15 @@ class SolarSystem3D {
         this.educationalOverlay = null;
         this.dataExport = null;
         this.objectInspector = null;
+        this.orbitalWorker = null;
+        this.lodSystem = null;
+        this.pbrMaterials = null;
+        this.postProcessing = null;
+        this.atmosphericScattering = null;
+        this.particleSystems = null;
+        this.multiSourceAPI = null;
+        this.missionPathVisualizer = null;
+        this.constellationOverlay = null;
 
         this.init();
     }
@@ -124,6 +142,15 @@ class SolarSystem3D {
         this.educationalOverlay = new EducationalOverlay();
         this.dataExport = new DataExport(this);
         this.objectInspector = new ObjectInspector(this);
+        this.orbitalWorker = new OrbitalWorker();
+        this.lodSystem = new LODSystem(this);
+        this.pbrMaterials = new PBRMaterials(this.textureLoader);
+        this.postProcessing = new PostProcessing(this.renderer, this.scene, this.camera);
+        this.atmosphericScattering = new AtmosphericScattering();
+        this.particleSystems = new ParticleSystems(this.scene);
+        this.multiSourceAPI = new MultiSourceAPI();
+        this.missionPathVisualizer = new MissionPathVisualizer(this.scene);
+        this.constellationOverlay = new ConstellationOverlay(this.scene, this.camera);
         
         // Register service worker for PWA
         if ('serviceWorker' in navigator) {
@@ -1296,8 +1323,34 @@ class SolarSystem3D {
             this.cameraLight.position.set(0, 0, 0);
         }
         
+        // Update LOD system
+        if (this.lodSystem) {
+            this.lodSystem.updateAll(this.camera.position);
+        }
+        
+        // Update particle systems
+        if (this.particleSystems) {
+            this.particleSystems.update(deltaTime);
+        }
+        
+        // Update constellation overlay
+        if (this.constellationOverlay) {
+            this.constellationOverlay.update(this.clock.getElapsedTime());
+        }
+        
+        // Update mission paths
+        if (this.missionPathVisualizer) {
+            this.missionPathVisualizer.updateAll(effectiveDate);
+        }
+        
         this.handleLabelClustering();
-        this.renderer.render(this.scene, this.camera);
+        
+        // Use post-processing if available
+        if (this.postProcessing) {
+            this.postProcessing.render();
+        } else {
+            this.renderer.render(this.scene, this.camera);
+        }
         this.labelRenderer.render(this.scene, this.camera);
     }
 
@@ -1551,6 +1604,11 @@ class SolarSystem3D {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Resize post-processing
+        if (this.postProcessing) {
+            this.postProcessing.resize(window.innerWidth, window.innerHeight);
+        }
     }
 }
 
