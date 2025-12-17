@@ -98,7 +98,10 @@ class SolarSystem3D {
             this.initUI();
             this.initApiModal();
             this.updateDateDisplay();
-            this.setMode('Simulation');
+            // Start in LIVE mode by default
+            this.setMode('live');
+            // Ensure initial visibility state (comets off by default)
+            this.updateObjectVisibility();
 
             window.addEventListener('resize', () => this.onWindowResize());
             this.animate();
@@ -528,29 +531,33 @@ class SolarSystem3D {
         comets.forEach(cometData => {
             const nucleusGeometry = new THREE.SphereGeometry(this.COMET_SCALE * 2, 16, 12);
             const nucleusMaterial = new THREE.MeshStandardMaterial({
-                color: 0x444444,
-                roughness: 0.9,
-                metalness: 0.1
+                color: 0x555555,
+                roughness: 0.6,
+                metalness: 0.25,
+                emissive: 0x111111,
+                emissiveIntensity: 0.35
             });
             const nucleus = new THREE.Mesh(nucleusGeometry, nucleusMaterial);
             nucleus.userData = { type: 'comet', name: cometData.name, info: cometData.info };
 
             const comaGeometry = new THREE.SphereGeometry(this.COMET_SCALE * 8, 16, 12);
             const comaMaterial = new THREE.MeshStandardMaterial({
-                color: 0xaaffff,
+                color: 0xcfffff,
                 transparent: true,
-                opacity: 0.3,
-                emissive: 0x002244,
-                emissiveIntensity: 0.1
+                opacity: 0.35,
+                emissive: 0x003366,
+                emissiveIntensity: 0.25
             });
             const coma = new THREE.Mesh(comaGeometry, comaMaterial);
             nucleus.add(coma);
 
-            const tailGeometry = new THREE.ConeGeometry(this.COMET_SCALE * 3, this.COMET_SCALE * 30, 8);
+            const tailGeometry = new THREE.ConeGeometry(this.COMET_SCALE * 3, this.COMET_SCALE * 30, 24);
             const tailMaterial = new THREE.MeshBasicMaterial({
-                color: 0x88ddff,
+                color: 0x99ddff,
                 transparent: true,
-                opacity: 0.2
+                opacity: 0.28,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
             });
             const tail = new THREE.Mesh(tailGeometry, tailMaterial);
             tail.rotation.z = Math.PI / 2;
@@ -576,9 +583,9 @@ class SolarSystem3D {
             const points = curve.getPoints(500);
             const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
             const orbitMaterial = new THREE.LineBasicMaterial({
-                color: 0x66aaff,
+                color: 0x66c2ff,
                 transparent: true,
-                opacity: 0.3
+                opacity: 0.25
             });
             const orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
             orbitLine.rotation.x = Math.PI / 2;
@@ -619,6 +626,14 @@ class SolarSystem3D {
                     inclination: cometData.inclination
                 }
             };
+
+            // Respect initial visibility (comets off at startup)
+            const shouldShow = this.showComets;
+            nucleus.visible = shouldShow;
+            if (orbitLine) orbitLine.visible = shouldShow && this.isOrbitsVisible;
+            if (orbitalPlane) orbitalPlane.visible = true; // plane used for rotation, keep but hide children
+            if (tail) tail.visible = shouldShow;
+            if (label) label.visible = shouldShow;
 
             this.comets.push(cometObj);
         });
@@ -1063,9 +1078,13 @@ class SolarSystem3D {
         });
 
         this.comets.forEach(comet => {
+            // Keep orbital plane for motion math, but hide visible parts
             if (comet.plane) {
-                comet.plane.visible = this.showComets;
+                comet.plane.visible = true;
             }
+            comet.mesh.visible = this.showComets;
+            if (comet.tail) comet.tail.visible = this.showComets;
+            if (comet.label) comet.label.visible = this.showComets;
             if (comet.orbit) {
                 comet.orbit.visible = this.showComets && this.isOrbitsVisible;
             }
